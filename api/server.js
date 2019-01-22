@@ -7,6 +7,7 @@ const KnexSessionStore = require('connect-session-knex')(session);
 
 const knexConfig = require('../knexfile.js');
 
+//configs........
 const server = express();
 
 const db = knex(knexConfig.development);
@@ -29,7 +30,7 @@ const sessionConfig = {
         clearInterval: 1000*60*30, //every 1/2 hour => clear out expired sessions
     })
 }
-
+//middlewares .........
 server.use(helmet());
 server.use(express.json());
 server.use(session(sessionConfig));
@@ -45,7 +46,7 @@ function requiresLogin(req,res,next) {
 server.use('/api/restricted', requiresLogin)
 
 
-// routes ...  
+// routes .............  
 server.get('/', (req,res) => {
     res.status(200).json('API is running... go catch it!')
 })
@@ -76,8 +77,6 @@ server.post('/api/login', (req,res) => {
         }})
         .catch(err => res.status(500).json({error: err}))
 })
-
-
 
 server.get('/api/users',requiresLogin, (req,res) => {
     db('users').then(users => {
