@@ -34,9 +34,22 @@ server.use(helmet());
 server.use(express.json());
 server.use(session(sessionConfig));
 
+function requiresLogin(req,res,next) {
+    if(req.session && req.session.user){
+        next();
+    }
+    else{
+        res.status(401).json({message: `not logged in...`})
+    }
+}
+server.use('/api/restricted', requiresLogin)
+
+
+// routes ...  
 server.get('/', (req,res) => {
     res.status(200).json('API is running... go catch it!')
 })
+
 
 server.post('/api/register', (req,res) => {
     const userInfo = req.body;
@@ -64,14 +77,7 @@ server.post('/api/login', (req,res) => {
         .catch(err => res.status(500).json({error: err}))
 })
 
-function requiresLogin(req,res,next) {
-    if(req.session && req.session.user){
-        next();
-    }
-    else{
-        res.status(401).json({message: `not logged in...`})
-    }
-}
+
 
 server.get('/api/users',requiresLogin, (req,res) => {
     db('users').then(users => {
@@ -98,5 +104,10 @@ server.get('/api/logout', (req, res) => {
     }
 });
 
+server.get('/api/restricted/users', (req,res) => {
+    db('users')
+    .then(users => res.status(200).json(users))
+    .catch(err => res.status(500).json({error: err}))
+})
 
 module.exports = server;
